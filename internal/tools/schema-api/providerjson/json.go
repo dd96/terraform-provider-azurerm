@@ -22,17 +22,28 @@ const (
 type ProviderJSON schema.Provider
 
 type SchemaJSON struct {
-	Type        string      `json:"type,omitempty"` // TODO - Needs to be interface{}
-	ConfigMode  string      `json:"configMode,omitempty"`
-	Optional    bool        `json:"optional,omitempty"`
-	Required    bool        `json:"required,omitempty"`
-	Default     interface{} `json:"default,omitempty"`
-	Description string      `json:"description,omitempty"`
-	Computed    bool        `json:"computed,omitempty"`
-	ForceNew    bool        `json:"forceNew,omitempty"`
-	Elem        interface{} `json:"elem,omitempty"`
-	MaxItems    int         `json:"maxItems,omitempty"`
-	MinItems    int         `json:"minItems,omitempty"`
+	Type        string             `json:"type,omitempty"` // TODO - Needs to be interface{}
+	ConfigMode  string             `json:"configMode,omitempty"`
+	Optional    bool               `json:"optional,omitempty"`
+	Required    bool               `json:"required,omitempty"`
+	Default     interface{}        `json:"default,omitempty"`
+	Description string             `json:"description,omitempty"`
+	Computed    bool               `json:"computed,omitempty"`
+	ForceNew    bool               `json:"forceNew,omitempty"`
+	Elem        interface{}        `json:"elem,omitempty"`
+	MaxItems    int                `json:"maxItems,omitempty"`
+	MinItems    int                `json:"minItems,omitempty"`
+	Validation  *ValidationInfoJSON `json:"validation,omitempty"`
+}
+
+type ValidationInfoJSON struct {
+	Type          string               `json:"type,omitempty"`          // e.g., "StringInSlice", "IntBetween", "IsUUID", "StringMatch"
+	Parameters    []interface{}        `json:"parameters,omitempty"`    // e.g., ["value1", "value2"] for StringInSlice or [1, 100] for IntBetween
+	Pattern       string               `json:"pattern,omitempty"`       // regex pattern for StringMatch validators
+	Message       string               `json:"message,omitempty"`       // custom error message if available
+	Composite     string               `json:"composite,omitempty"`     // "all", "any", "none" for composite validators
+	Validators    []ValidationInfoJSON `json:"validators,omitempty"`    // nested validators for composite validators
+	TerraformHint string               `json:"terraformHint,omitempty"` // suggested Terraform validation condition expression
 }
 
 func (b *SchemaJSON) UnmarshalJSON(body []byte) error {

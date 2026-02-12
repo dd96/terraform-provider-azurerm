@@ -9,6 +9,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+var includeValidation bool
+
+// SetIncludeValidation sets whether to include validation information in the schema
+func SetIncludeValidation(include bool) {
+	includeValidation = include
+}
+
 func resourceFromRaw(input *schema.Resource) (*ResourceJSON, error) {
 	if input == nil {
 		return nil, fmt.Errorf("resource not found")
@@ -45,7 +52,7 @@ func resourceFromRaw(input *schema.Resource) (*ResourceJSON, error) {
 }
 
 func schemaFromRaw(input *schema.Schema) SchemaJSON {
-	return SchemaJSON{
+	result := SchemaJSON{
 		Type:        input.Type.String(),
 		ConfigMode:  decodeConfigMode(input.ConfigMode),
 		Optional:    input.Optional,
@@ -58,6 +65,17 @@ func schemaFromRaw(input *schema.Schema) SchemaJSON {
 		MaxItems:    input.MaxItems,
 		MinItems:    input.MinItems,
 	}
+
+	// Extract validation information if enabled
+	if includeValidation {
+		if input.ValidateFunc != nil {
+			result.Validation = extractValidation(input.ValidateFunc)
+		} else if input.ValidateDiagFunc != nil {
+			result.Validation = extractValidation(input.ValidateDiagFunc)
+		}
+	}
+
+	return result
 }
 
 func SchemaFromMap(input map[string]interface{}) SchemaJSON {
